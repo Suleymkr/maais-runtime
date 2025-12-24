@@ -1,0 +1,223 @@
+# MAAIS-Runtime Policies with MITRE ATLAS Mapping
+# https://atlas.mitre.org/
+
+version: "2.0"
+description: "Security policies mapped to MITRE ATLAS tactics"
+
+policies:
+  # ============ INITIAL ACCESS ============
+  - id: "atlas_initial_access_external"
+    applies_to: ["tool_call", "api_call"]
+    condition:
+      parameters:
+        url:
+          pattern: "^(https?://)(?!localhost|127.0.0.1|192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.).*"
+    decision: "DENY"
+    reason: "External network access - MITRE ATLAS: Initial Access"
+    priority: 10
+    metadata:
+      mitre_tactic: "Initial Access"
+      mitre_technique: "T1199"
+      severity: "high"
+
+  # ============ EXECUTION ============
+  - id: "atlas_execution_command"
+    applies_to: ["tool_call"]
+    condition:
+      target:
+        in: ["execute_command", "run_shell", "os.system", "subprocess", "eval", "exec"]
+    decision: "DENY"
+    reason: "Command execution - MITRE ATLAS: Execution"
+    priority: 10
+    metadata:
+      mitre_tactic: "Execution"
+      mitre_technique: "T1059"
+      severity: "critical"
+
+  - id: "atlas_execution_scripting"
+    applies_to: ["tool_call", "memory_write"]
+    condition:
+      or:
+        - target: "execute_script"
+        - parameters:
+            content:
+              pattern: "(?i)(powershell|bash|python|javascript).*\.(ps1|sh|py|js)"
+    decision: "DENY"
+    reason: "Script execution - MITRE ATLAS: Execution"
+    priority: 15
+    metadata:
+      mitre_tactic: "Execution"
+      mitre_technique: "T1064"
+      severity: "high"
+
+  # ============ PERSISTENCE ============
+  - id: "atlas_persistence_file"
+    applies_to: ["file_write", "tool_call"]
+    condition:
+      target:
+        pattern: "(?i)\.(exe|dll|so|bin|sh|py|js)$"
+      or:
+        parameters:
+          filename:
+            pattern: "(/etc/|/bin/|/usr/bin/|/system/|/boot/|\.bashrc|\.profile)"
+    decision: "DENY"
+    reason: "Persistence mechanism - MITRE ATLAS: Persistence"
+    priority: 20
+    metadata:
+      mitre_tactic: "Persistence"
+      mitre_technique: "T1543"
+      severity: "high"
+
+  # ============ PRIVILEGE ESCALATION ============
+  - id: "atlas_privilege_escalation"
+    applies_to: ["tool_call", "api_call"]
+    condition:
+      or:
+        - target: "sudo"
+        - parameters:
+            command:
+              pattern: "(?i)(sudo|su|runas|elevate|privilege)"
+        - action_type: "memory_write"
+          target: "/etc/passwd"
+    decision: "DENY"
+    reason: "Privilege escalation attempt - MITRE ATLAS: Privilege Escalation"
+    priority: 10
+    metadata:
+      mitre_tactic: "Privilege Escalation"
+      mitre_technique: "T1548"
+      severity: "critical"
+
+  # ============ DEFENSE EVASION ============
+  - id: "atlas_defense_evasion_logs"
+    applies_to: ["file_write", "memory_write"]
+    condition:
+      target:
+        pattern: "(?i)(/var/log/|/logs/|audit|\.log$)"
+    decision: "DENY"
+    reason: "Log tampering - MITRE ATLAS: Defense Evasion"
+    priority: 25
+    metadata:
+      mitre_tactic: "Defense Evasion"
+      mitre_technique: "T1070"
+      severity: "medium"
+
+  - id: "atlas_defense_evasion_obfuscation"
+    applies_to: ["tool_call"]
+    condition:
+      parameters:
+        content:
+          pattern: "(?i)(base64|hex|rot13|xor|obfuscate|encode)"
+    decision: "DENY"
+    reason: "Obfuscated content - MITRE ATLAS: Defense Evasion"
+    priority: 30
+    metadata:
+      mitre_tactic: "Defense Evasion"
+      mitre_technique: "T1027"
+      severity: "medium"
+
+  # ============ DISCOVERY ============
+  - id: "atlas_discovery_system"
+    applies_to: ["tool_call"]
+    condition:
+      target:
+        in: ["list_processes", "list_files", "network_scan", "port_scan", "system_info"]
+    decision: "DENY"
+    reason: "System discovery - MITRE ATLAS: Discovery"
+    priority: 40
+    metadata:
+      mitre_tactic: "Discovery"
+      mitre_technique: "T1082"
+      severity: "low"
+
+  # ============ LATERAL MOVEMENT ============
+  - id: "atlas_lateral_movement"
+    applies_to: ["api_call", "tool_call"]
+    condition:
+      parameters:
+        host:
+          pattern: "(192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)"
+        or:
+          target: "ssh"
+          target: "remote_exec"
+    decision: "DENY"
+    reason: "Lateral movement attempt - MITRE ATLAS: Lateral Movement"
+    priority: 35
+    metadata:
+      mitre_tactic: "Lateral Movement"
+      mitre_technique: "T1021"
+      severity: "high"
+
+  # ============ EXFILTRATION ============
+  - id: "atlas_exfiltration_data"
+    applies_to: ["tool_call", "api_call", "network_request"]
+    condition:
+      parameters:
+        data:
+          pattern: "(?i)(password|secret|token|key|credential|ssn|credit.?card)"
+      or:
+        action_type: "network_request"
+          destination: "external"
+    decision: "DENY"
+    reason: "Data exfiltration - MITRE ATLAS: Exfiltration"
+    priority: 10
+    metadata:
+      mitre_tactic: "Exfiltration"
+      mitre_technique: "T1041"
+      severity: "critical"
+
+  # ============ IMPACT ============
+  - id: "atlas_impact_destructive"
+    applies_to: ["tool_call", "file_write"]
+    condition:
+      or:
+        - target:
+            pattern: "(?i)(delete|remove|rm|format|wipe|erase)"
+        - parameters:
+            command:
+              pattern: "(?i)(rm -rf|format|dd if=/dev/zero)"
+        - action_type: "file_write"
+          target: "/"
+    decision: "DENY"
+    reason: "Destructive action - MITRE ATLAS: Impact"
+    priority: 5
+    metadata:
+      mitre_tactic: "Impact"
+      mitre_technique: "T1485"
+      severity: "critical"
+
+  # ============ SAFE OPERATIONS ============
+  - id: "allow_safe_operations"
+    applies_to: ["tool_call"]
+    condition:
+      target:
+        in: ["calculator", "json_formatter", "text_processor", "data_analyzer"]
+    decision: "ALLOW"
+    reason: "Safe tool operation"
+    priority: 1000
+    metadata:
+      category: "safe"
+      requires_approval: false
+
+  - id: "allow_internal_network"
+    applies_to: ["api_call", "tool_call"]
+    condition:
+      parameters:
+        url:
+          pattern: "^(https?://)(localhost|127\.0\.0\.1|192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.).*"
+    decision: "ALLOW"
+    reason: "Internal network access allowed"
+    priority: 900
+    metadata:
+      category: "internal"
+      requires_approval: false
+
+  # ============ DEFAULT DENY ============
+  - id: "default_deny"
+    applies_to: ["*"]
+    condition: {}
+    decision: "DENY"
+    reason: "Default deny - Unauthorized action"
+    priority: 9999
+    metadata:
+      category: "default"
+      requires_approval: true
