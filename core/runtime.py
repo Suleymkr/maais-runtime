@@ -62,3 +62,48 @@ def get_runtime(config: Dict[str, Any] = None) -> Runtime:
     if _runtime_instance is None:
         _runtime_instance = Runtime(config=config)
     return _runtime_instance
+
+
+class MAAISRuntime(Runtime):
+    """Compatibility wrapper used by tests and demos.
+
+    Exposes the historical public API expected by older tests: a
+    `MAAISRuntime` class with `intercept` and `health_check` methods and a
+    top-level `audit_logger` accessor on the runtime instance.
+    """
+
+    def __init__(self, tenant_manager: Optional[TenantManager] = None, config: Dict[str, Any] = None):
+        super().__init__(tenant_manager=tenant_manager, config=config)
+
+    @property
+    def audit_logger(self):
+        # Return default tenant's audit logger for compatibility
+        try:
+            components = self._mt_runtime.tenant_manager.get_tenant_components('default')
+            return components.get('audit_logger')
+        except Exception:
+            return None
+
+    def health_check(self) -> Dict[str, Any]:
+        data = super().health_check()
+        # Provide a `policy_count` key expected by tests
+        try:
+            pm = self._mt_runtime.tenant_manager
+            policy_count = 0
+            for tid in pm.tenants:
+                try:
+                    comps = pm.get_tenant_components(tid)
+                    engine = comps.get('policy_engine')
+                    if engine and hasattr(engine, 'policies'):
+                        policy_count += len(engine.policies)
+                except Exception:
+                    continue
+            data['policy_count'] = policy_count
+        except Exception:
+            data['policy_count'] = 0
+
+        return data
+
+
+# Provide the historical symbol at module level for imports like `from core.runtime import MAAISRuntime`
+MAAISRuntime = MAAISRuntime
