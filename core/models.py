@@ -56,6 +56,7 @@ class Decision:
     ciaa_violations: Dict[str, str] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.utcnow)
     accountability_owner: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for logging"""
@@ -65,7 +66,8 @@ class Decision:
             "explanation": self.explanation,
             "ciaa_violations": self.ciaa_violations,
             "timestamp": self.timestamp.isoformat(),
-            "accountability_owner": self.accountability_owner
+            "accountability_owner": self.accountability_owner,
+            "metadata": self.metadata
         }
 
 

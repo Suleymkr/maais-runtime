@@ -204,36 +204,50 @@ class TenantManager:
     
     def _create_policy_engine(self, tenant: TenantConfig) -> PolicyEngine:
         """Create policy engine for tenant"""
-        # Merge all policy files for tenant
-        policy_contents = []
-        
+        # Merge all policy files for tenant into a single policy list
+        merged_policies = []
+
         for policy_file in tenant.policy_files:
             try:
                 with open(policy_file, 'r') as f:
-                    policy_contents.append(f.read())
+                    data = yaml.safe_load(f) or {}
+                    if isinstance(data, dict) and "policies" in data:
+                        merged_policies.extend(data.get("policies", []))
+                    else:
+                        # If file is a single policy dict, try to normalize
+                        if isinstance(data, dict):
+                            if "id" in data:
+                                merged_policies.append(data)
             except FileNotFoundError:
                 print(f"Policy file not found for tenant {tenant.tenant_id}: {policy_file}")
-        
-        if not policy_contents:
-            # Use default policies if available, otherwise proceed with empty policy set.
+            except Exception as e:
+                print(f"Error parsing policy file {policy_file}: {e}")
+
+        if not merged_policies:
+            # Try loading default file gracefully
             default_file = "policies/static/security_policies.yaml"
             try:
                 with open(default_file, 'r') as f:
-                    policy_contents.append(f.read())
+                    data = yaml.safe_load(f) or {}
+                    if isinstance(data, dict) and "policies" in data:
+                        merged_policies.extend(data.get("policies", []))
             except FileNotFoundError:
                 print(f"Warning: default policy file missing: {default_file} — tenant will have no policies")
-        
-        # Create merged policy file
+            except Exception as e:
+                print(f"Error parsing default policy file: {e}")
+
+        # Write a canonical merged YAML with a single `policies:` list
         tenant_policy_dir = self.base_dir / "policies" / tenant.tenant_id
         tenant_policy_dir.mkdir(parents=True, exist_ok=True)
-        
+
         merged_file = tenant_policy_dir / "merged_policies.yaml"
-        
-        with open(merged_file, 'w') as f:
-            for content in policy_contents:
-                f.write(content)
-                f.write("\n---\n")
-        
+
+        try:
+            with open(merged_file, 'w') as f:
+                yaml.safe_dump({"policies": merged_policies}, f)
+        except Exception as e:
+            print(f"Error writing merged policy file {merged_file}: {e}")
+
         return PolicyEngine(str(merged_file))
     
     def _create_ciaa_evaluator(self, tenant: TenantConfig) -> CIAAEvaluator:
