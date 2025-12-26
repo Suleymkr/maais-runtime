@@ -28,15 +28,15 @@ class ActionRequest:
     Normalized action request schema.
     All agent actions must be converted to this format before evaluation.
     """
-    action_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     agent_id: str
     action_type: ActionType
     target: str  # Tool/API/Resource name
     parameters: Dict[str, Any]
     declared_goal: str
+    action_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: datetime = field(default_factory=datetime.utcnow)
     context: Dict[str, Any] = field(default_factory=dict)  # Additional context
-    
+
     def __post_init__(self):
         """Validate the action request"""
         if not self.agent_id:
